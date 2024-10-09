@@ -10,11 +10,13 @@ from app.users.models import User
 
 async def get_current_user(request: Request):
     token = request.headers.get('Authorization')
-    print(token)
+    if token is None:
+        token = request.cookies.get('token')
+
     if token is None:
         raise NoToken
     try:
-        data = jwt.decode(token, settings.SECRET_KEY, ['HS256'])
+        data = jwt.decode(token, settings.SECRET_KEY, 'HS256')
     except JWTError:
         raise IncorrectToken
 

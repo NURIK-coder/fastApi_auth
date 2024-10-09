@@ -35,6 +35,7 @@ target_metadata = Base.metadata
 
 ##3
 from app.users.models import *
+from app.posts.models import *
 
 
 
