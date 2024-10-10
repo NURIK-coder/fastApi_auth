@@ -4,6 +4,7 @@ from typing import List
 from fastapi import APIRouter, Depends, UploadFile, Form
 from starlette.responses import Response
 
+from app.posts.models import Post
 from app.posts.schemas import SPost
 from app.users.auth import authenticate_user, create_access_token, hash_password
 from app.users.dependencies import get_current_user
@@ -20,8 +21,8 @@ async def user_list() -> List[SUser]:
 
 
 @router.post('/login')
-async def login(data: SLogin, response: Response):
-    user = await authenticate_user(data.username, data.password)
+async def login(response: Response, username:str=Form(), password: str = Form()):
+    user = await authenticate_user(username, password)
     token = create_access_token({'sub': str(user.id)})
     response.set_cookie('token', token)
 
@@ -46,6 +47,11 @@ async def delete_user(user_id: int):
 @router.get('/current')
 async def current(user: User = Depends(get_current_user)):
     return user
+
+@router.get('/current_post')
+async def current_user_posts(user: User = Depends(get_current_user)):
+    posts = await User.detail(record_id=user.id)
+    return posts
 
 
 

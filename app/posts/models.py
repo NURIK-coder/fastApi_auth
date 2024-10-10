@@ -12,14 +12,18 @@ class Category(Base):
     __tablename__ = 'categories'
     id = Column(BigInteger, primary_key=True)
     name = Column(String(100), nullable=False)
-    post = relationship('Post', back_populates='category')
+    posts = relationship('Post', back_populates='category')
+
+    def __str__(self):
+        return self.name
 
     @classmethod
-    async def get_post_category(cls):
+    async def detail(cls, record_id: int):
         async with async_session_maker() as session:
-            query = select(cls).options(joinedload(cls.post))
+            query = select(cls).filter_by(id=record_id).options(joinedload(cls.posts))
             result = await session.execute(query)
-            return result.scalars().all()
+            return result.unique().scalar_one_or_none()
+
 
 
 class Post(Base):
@@ -28,22 +32,28 @@ class Post(Base):
     title = Column(String(100), nullable=False)
     content = Column(Text)
     created_at = Column(TIMESTAMP, default=datetime.datetime.now)
-    likes_count = Column(BigInteger, nullable=True)
+    likes_count = Column(BigInteger, default=0)
     user_id = Column(BigInteger, ForeignKey('users.id', ondelete='CASCADE'))
     user = relationship('User', back_populates='posts')
     category_id = Column(BigInteger, ForeignKey('categories.id', ondelete='CASCADE'))
-    category = relationship('Category', back_populates='post')
+    category = relationship('Category', back_populates='posts')
+    img = Column(String(255), nullable=True)
+    comments = relationship('Comment', back_populates='post')
+
+    def __str__(self):
+        return self.title
+
 
     @classmethod
     async def get_all(cls):
         async with async_session_maker() as session:
-            query = select(cls).options(joinedload(cls.user))
+            query = select(cls).options(joinedload(cls.user)).options(joinedload(cls.category))
             result = await session.execute(query)
             return result.scalars().all()
 
     @classmethod
-    async def get_category_post(cls):
+    async def detail(cls, post_id):
         async with async_session_maker() as session:
-            query = select(cls).options(joinedload(cls.category))
+            query = select(cls).filter_by(id=post_id).options(joinedload(cls.user)).options(joinedload(cls.comments))
             result = await session.execute(query)
-            return result.scalars().all()
+            return result.unique().scalar_one_or_none()

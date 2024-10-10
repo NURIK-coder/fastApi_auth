@@ -3,7 +3,7 @@ from typing import List
 
 from fastapi import APIRouter
 
-from app.posts.schemas import SCPost, SCPost, SPost
+from app.posts.schemas import SCPost, SCPost, SPost, SPostDetail
 from app.posts.models import Post
 
 router = APIRouter(prefix='/post')
@@ -43,6 +43,7 @@ async def update_post(data: SCPost, post_id: int):
     return {'message': 'Success!'}
 
 @router.get('/{post_id}')
-async def detail(post_id: int)->SPost:
-    post = await Post.detail(record_id=post_id)
+async def detail(post_id: int)->SPostDetail:
+    post = await Post.detail(post_id=post_id)
     return post
+

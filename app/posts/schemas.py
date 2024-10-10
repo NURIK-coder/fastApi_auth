@@ -1,7 +1,9 @@
 import datetime
-from typing import Union, Optional
+from typing import Union, Optional, List
 
 from pydantic import BaseModel, field_validator
+
+from app.comment.schema import SComment
 
 
 class SCPost(BaseModel):
@@ -16,6 +18,9 @@ class SPost(BaseModel):
     created_at: datetime.datetime
 
     @field_validator('created_at')
-    def parse_datea(cls, v):
+    def parse_date(cls, v):
         return v.strftime('%Y-%m-%d %H:%M')
 
+
+class SPostDetail(SPost):
+    comments: List[SComment]
